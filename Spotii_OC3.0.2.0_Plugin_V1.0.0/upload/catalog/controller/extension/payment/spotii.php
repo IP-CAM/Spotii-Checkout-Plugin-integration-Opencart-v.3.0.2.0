@@ -218,33 +218,44 @@ class ControllerExtensionPaymentSpotii extends Controller
         $body2 = json_encode($body2, JSON_UNESCAPED_UNICODE);
         //$this->log->write($body2);
         //$this->log("Getting checkout URL from: " . $url);
-        $response2 = $this->sendCurl($url, $body2);
-        if ($response2['status'] != 100 && $response2['status'] != 201) {
-            $data['error'] = "Unable to obtain valid response from CheckOut URL. Please contact administrator for assistance";
-            $this->log("Error using Spotii Checkout API");
-        } else {
-            $response_body2 = $response2['ResponseBody'];
-            $this->log->write($response_body2);
-            $index = strpos($response_body2, '{');
-            $json_body = substr($response_body2, $index);
-            $response_body_arr2 = json_decode($json_body, true);
-            if (array_key_exists('checkout_url', $response_body_arr2)) {
-                $checkout_url = $response_body_arr2['checkout_url'];
-                $this->log($checkout_url);
-                $data['action'] = $checkout_url;
-                $params = explode("?", $checkout_url, 2);
-                $split_params = explode("=", $params[1], 2);
-                $form_param['token'] = $split_params[1];
-                $data['form_params'] = $form_param;
-                $data['button_confirm'] = 'Confirm Order';
-                $data['currency'] = $order_info['currency_code'];
-                $data['total'] = number_format($converted_total, 2, '.', '');
-                $data['installment'] = number_format($converted_total / 4.00, 2, '.', '');
-            } else { // We did not receive a Checkout URL from Spotii, setup to redirect and log failure
+        if($converted_total && $converted_total > 200)
+        {
+            
+            $response2 = $this->sendCurl($url, $body2);
+            if ($response2['status'] != 100 && $response2['status'] != 201) {
                 $data['error'] = "Unable to obtain valid response from CheckOut URL. Please contact administrator for assistance";
-                $this->log("Error using Spotii Checkout API: " . $response_body2);
-                $this->log($response_body2);
+                $this->log("Error using Spotii Checkout API");
+            } else {
+                $response_body2 = $response2['ResponseBody'];
+                $this->log->write($response_body2);
+                $index = strpos($response_body2, '{');
+                $json_body = substr($response_body2, $index);
+                $response_body_arr2 = json_decode($json_body, true);
+                if (array_key_exists('checkout_url', $response_body_arr2)) {
+                    $checkout_url = $response_body_arr2['checkout_url'];
+                    $this->log($checkout_url);
+                    $data['action'] = $checkout_url;
+                    $params = explode("?", $checkout_url, 2);
+                    $split_params = explode("=", $params[1], 2);
+                    $form_param['token'] = $split_params[1];
+                    $data['form_params'] = $form_param;
+                    $data['button_confirm'] = 'Confirm Order';
+                    $data['currency'] = $order_info['currency_code'];
+                    $data['total'] = number_format($converted_total, 2, '.', '');
+                    $data['installment'] = number_format($converted_total / 4.00, 2, '.', '');
+                } else { // We did not receive a Checkout URL from Spotii, setup to redirect and log failure
+                    $data['error'] = "Unable to obtain valid response from CheckOut URL. Please contact administrator for assistance";
+                    $this->log("Error using Spotii Checkout API: " . $response_body2);
+                    $this->log($response_body2);
+                }
             }
+        
+        }
+        else
+        {
+            $data['error'] = "You don't quite have enough in your basket: Spotii is available for purchases over AED 200. With a little more shopping, you can split your payment over 4 cost-free instalments.";
+            $this->log("Error due to order value is less:[Spotii] " . $converted_total);
+            $this->log($converted_total);
         }
         return $this->load->view('extension/payment/spotii', $data);
     }
