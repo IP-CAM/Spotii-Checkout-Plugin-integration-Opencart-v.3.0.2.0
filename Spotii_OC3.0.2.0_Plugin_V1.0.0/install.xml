@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+  <name>Spotii Product Widget</name>
+  <code>spotii-product-widget</code>
+  <version>1.0.0</version>
+  <author>Ljupcho Prchkovski</author>
+  <link>ljupcho.prchkovski@gmail.com</link>
+  <file path="catalog/controller/product/product.php">
+    <operation>
+      <search><![CDATA[$data['location'] = $product_info['location'];]]></search>
+      <add position="before"><![CDATA[
+        $data['spotii_currency'] = $this->session->data['currency'];
+		$data['spotii_total'] = number_format($product_info['price'], 2, '.', '');
+		$data['spotii_installment'] = number_format($product_info['price'] / 4.00, 2, '.', '');
+      ]]></add>
+    </operation>
+  </file>
+  <file path="catalog/view/theme/*/template/product/product.tpl">
+    <operation>
+      <search><![CDATA[<div class="accordion" id="accordionInfo">]]></search>
+      <add position="after"><![CDATA[
+      <div class="card z-depth-0">
+    	<div class="card-header" id="paylaterGuide" data-toggle="collapse" data-target="#paylaterGuideInner">
+    		<h5 class="mb-0">
+    			<div class="accordionShare" type="button" data-toggle="collapse" data-target="#paylaterGuideInner" aria-expanded="false" aria-controls="paylaterGuideInner">
+    			</div>SHOP NOW, PAY LATER
+    		</h5>
+    	</div>
+    	<div id="paylaterGuideInner" class="collapse" aria-labelledby="share" data-parent="#accordionInfo">
+    		<div class="card-body">
+    			<span class="spotii-payment-text">Payment Schedule</span>
+    			<div class="progressbar-container">
+    				<div class="bar"></div>
+    				<ul class="steps">
+    					<li class="highlight">
+    						<span class="spotii-installment-amount"><?php echo $spotii_currency; ?> <?php echo $spotii_installment; ?></span>
+    						<span class="time-period">Today</span>
+    					</li>
+    					<li class="step">
+    						<span class="spotii-installment-amount"><?php echo $spotii_currency; ?> <?php echo $spotii_installment; ?></span>
+    						<span class="time-period">In 2 Weeks</span>
+    					</li>
+    					<li class="step">
+    						<span class="spotii-installment-amount"><?php echo $spotii_currency; ?> <?php echo $spotii_installment; ?></span>
+    						<span class="time-period">In 4 Weeks</span>
+    					</li>
+    					<li class="step">
+    						<span class="spotii-installment-amount"><?php echo $spotii_currency; ?> <?php echo $spotii_installment; ?></span>
+    						<span class="time-period">In 6 Weeks</span>
+    					</li>
+    				</ul>
+    			</div>
+    			<span class="spotii-grand-total">Total <?php echo $spotii_total; ?></span>
+    		</div>
+    	</div>
+    </div>
+      ]]></add>
+    </operation>
+  </file>
+</modification>
