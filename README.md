@@ -86,7 +86,7 @@ Once these files are in their respective paths, please open your Opencart Admin 
 
      <div class=" spotii_widget_cart ">Buy Now, Pay Later</div>  
 
-3. Copy the file "common.js" from the Spotii plugin folder (\OC_Spotii_Plugin-master\Spotii_OC3.0.2.0_Plugin_V1.0.0) to the common.js file of Artworks at reference path \catalog\view\javascript\common.js 
+3. Copy the file "common.js" from the Spotii plugin folder (\OC_Spotii_Plugin-master\Spotii_OC3.0.2.0_Plugin_V1.0.0) to the common.js file of corresponding location in the file folder (at reference path \catalog\view\javascript\common.js)
 
 
 ## At this stage, Spotii installation is complete!  
