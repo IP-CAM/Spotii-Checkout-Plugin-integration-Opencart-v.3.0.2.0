@@ -20,7 +20,7 @@ class ModelExtensionPaymentSpotii extends Model
         if($status){
             $method_data = array(
                 'code'     => 'spotii',
-                'title'    => 'Spotii Pay',
+                'title'    => 'Spotii: Shop Now, Pay Later',
                 'sort_order' => $this->config->get('payment_spotii_sort_order')
         );
     }
