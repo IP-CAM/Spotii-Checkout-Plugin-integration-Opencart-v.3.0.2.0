@@ -1,12 +1,11 @@
-$(document).ready(function () {
 ///////////////////////// V1.0.0 - Spotii Widget Code Snippet -- START-- SPOTII OC CHANGE TO BE DONE ////////////////////////////////
-
-$(function () {
-  var spotii_product_class = $(".spotii_widget_product");
-  if (spotii_product_class && spotii_product_class.length) {
-    var prod_price = $(".product-price").text();
-    prod_price = prod_price ? prod_price.replace("AED", "") : "";
-    if (prod_price) {
+$(document).ready(function () 
+{
+  $(function () { /** This is the Start of Function for all widgets */
+    var sptii_product_class = $(".spotii_widget_product");
+    if (sptii_product_class && sptii_product_class.length) { /** This is the Start of product div check */
+      var prod_price = $(".product-price").text();
+      prod_price = prod_price ? prod_price.replace("AED", "") : "";
       var instaPrice = parseFloat(prod_price / 4).toFixed(2);
       var currency = "د.إ";
       window.spotiiConfig = {
@@ -22,30 +21,31 @@ $(function () {
         a.src = "https://widget.spotii.me/v1/javascript/price-widget";
         f.parentNode.insertBefore(a, f);
       })(window, document, "script");
-      $(".spotii-price").html(instaPrice + " " + currency);
-    }
-  }
 
-  /** SPOTII OC CHANGE TO BE DONE - For Variant Price Updation for Spotii Widget */
+      setTimeout(function () {
+        $(".spotii-price").html(instaPrice + " " + currency);
+      }, 1000);
 
-  $(".option").change(function () {
-    var prod_price = $(".product-price").text();
-    prod_price = prod_price ? prod_price.replace("AED", "") : "";
-    var instaPrice = parseFloat(prod_price / 4).toFixed(2);
-    var currency = "د.إ";
-    $(".spotii-price").html(instaPrice + " " + currency);
-    //   console.log("[spotii]:", instaPrice + " " + currency);
-  });
+      /** SPOTII OC CHANGE TO BE DONE - For Variant Price Updation for Spotii Widget */
 
-  /** SPOTII OC CHANGE TO BE DONE - For Cart Widget */
+      $(".option").change(function () { /** This is the Start of Function for Product Option Price Update in Widget */
+        var prod_price = $(".product-price").text();
+        prod_price = prod_price ? prod_price.replace("AED", "") : "";
+        var instaPrice = parseFloat(prod_price / 4).toFixed(2);
+        var currency = "د.إ";
+        $(".spotii-price").html(instaPrice + " " + currency);
+      }); /** This is the End of Function for Product Option Price Update in Widget */
 
-  var spotii_cart_class = $(".spotii_widget_cart");
-  if (spotii_cart_class && spotii_cart_class.length) {
-    var cart_total =
-      $("#total tr:nth-child(2)")
-        .text()
-        .replace(/[^0-9]/g, "") / 100;
-    if (cart_total) {
+    } /** This is the Start of product div check */
+
+    /** SPOTII OC CHANGE TO BE DONE -  */
+
+    var sptii_cart_class = $(".spotii_widget_cart");
+    if (sptii_cart_class && sptii_cart_class.length) { /** This is the Start of Function for Cart Widget */
+      var cart_total =
+        $("#total tr:nth-child(2)")
+          .text()
+          .replace(/[^0-9]/g, "") / 100;
       var instaPrice = parseFloat(cart_total / 4).toFixed(2);
       var currency = "د.إ";
       window.spotiiConfig = {
@@ -61,10 +61,11 @@ $(function () {
         a.src = "https://widget.spotii.me/v1/javascript/price-widget";
         f.parentNode.insertBefore(a, f);
       })(window, document, "script");
-      $(".spotii-price").html(instaPrice + " " + currency);
-    }
-  }
-});
 
-///////////////////////// V1.0.0 - Spotii Widget Code Snippet -- END -- ////////////////////////////////
+      setTimeout(function () {
+        $(".spotii-price").html(instaPrice + " " + currency);
+      }, 1000);
+    } /** This is the End of Function for Cart Widget */
+  }); /** This is the End of Function for all widgets */
 });
+///////////////////////// V1.0.0 - Spotii Widget Code Snippet -- END -- ////////////////////////////////
