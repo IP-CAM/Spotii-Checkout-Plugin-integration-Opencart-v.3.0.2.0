@@ -100,6 +100,8 @@ class ControllerExtensionPaymentSpotii extends Controller
 
     public function index()
     {
+        try
+        {
         //First we get set the Auth Token using the config public & private keys
         $auth_status = $this->setToken();
         $this->log->write($auth_status);
@@ -117,8 +119,7 @@ class ControllerExtensionPaymentSpotii extends Controller
         $tax_amount = 0;
         $shipping_amount = 0;
         $discount_amount = 0;
-
-        //$shipping_amount
+        //print_r($order_info);
 
         foreach ($order_total_query->rows as $total) {
             if ($total['code'] == 'shipping') {
@@ -131,16 +132,14 @@ class ControllerExtensionPaymentSpotii extends Controller
                 $discount_amount = number_format($total['value'] * $order_info['currency_value'], 2, '.', '');
             }
         }
-
         $body2 = array(
             "reference" => $order_id,
             "display_reference" => $order_id,
             "description" => "Order #" . $order_id,
             "total" => $converted_total,
-            "currency" => $order_info['currency_code'],
+            "currency" =>$order_info['currency_code'],
             "confirm_callback_url" => $this->url->link('extension/payment/spotii/callback'),
-            "reject_callback_url" => $this->url->link('checkout/checkout'),
-
+            "reject_callback_url" => $this->url->link('checkout/checkout'),      
             // Order
             "order" => array(
                 "tax_amount" => $tax_amount, // Need to check this
@@ -161,9 +160,9 @@ class ControllerExtensionPaymentSpotii extends Controller
                     "line2" => $order_info['payment_address_2'],
                     "line3" => "",
                     "line4" => $order_info['payment_city'],
-                    "state" => "", #need exact state
+                    "state" => $order_info['payment_zone'], 
                     "postcode" => $order_info['payment_postcode'],
-                    "country" => 'AE', #need exact country
+                    "country" => $order_info['payment_iso_code_2'],
                     "phone" => $order_info['telephone']
                 ),
 
@@ -175,9 +174,9 @@ class ControllerExtensionPaymentSpotii extends Controller
                     "line2" => $order_info['shipping_address_2'],
                     "line3" => "",
                     "line4" => $order_info['shipping_city'],
-                    "state" => "",
+                    "state" => $order_info['shipping_zone'],
                     "postcode" => $order_info['shipping_postcode'],
-                    "country" => 'AE',
+                    "country" => $order_info['shipping_iso_code_2'],
                     "phone" => $order_info['telephone']
                 )
             )
@@ -191,65 +190,58 @@ class ControllerExtensionPaymentSpotii extends Controller
                 "upc" => $product["model"],
                 "quantity" => $product["quantity"],
                 "price" => number_format($product["price"] * $order_info['currency_value'], 2, '.', ''),
-                "currency" => "AED",
+                "currency" => $order_info['currency_code'],
                 "image_url" => "" //$this->model_tool_image->resize($product['image'], $this->config->get($this->config->get('config_theme') . '_image_popup_width'), $this->config->get($this->config->get('config_theme') . '_image_popup_height')),
             );
         }
-        // $order = $this->model_checkout_order->getOrderProducts($order_id);
-        // $products = $this->cart->getProducts();
-        // foreach ($order as $item) {
-        //     $product = $this->model_catalog_product->getProduct($item["product_id"]);
-        //     $lines[] = array(
-        //         "sku" => 1,
-        //         "reference" => $item["product_id"],
-        //         "title" => $product["name"],
-        //         "upc" => $item["product_id"],
-        //         "quantity" => $item["quantity"],
-        //         "price" => (string) ((float) $product["price"] * 3.6730),
-        //         "currency" => 'AED',
-        //         "image_url" => "",
-        //     );
-        // }
 
         $body2['order']['lines'] = $lines;
         $url = $this->config->get('payment_spotii_test') == "sandbox" ? 'https://api.sandbox.spotii.me/api/v1.0/checkouts/' :  'https://api.spotii.me/api/v1.0/checkouts/';
-        // $url = 'https://api.spotii.me/api/v1.0/checkouts/';
-        // $this->log->write($body2);
+
         $body2 = json_encode($body2, JSON_UNESCAPED_UNICODE);
-        //$this->log->write($body2);
-        //$this->log("Getting checkout URL from: " . $url);
-        if($converted_total && $converted_total > 200)
+        $min =200;
+        switch($order_info['currency_code']){
+            case 'AED':
+            case 'SAR':
+                break;
+            case 'BHD':
+            case 'OMR':
+            case 'KWD': $min=20;
+                break;
+            case 'USD': $min=55;  
+                break;
+                    
+        }
+        if($converted_total && $converted_total >= $min)
         {
-            
             $response2 = $this->sendCurl($url, $body2);
-            if ($response2['status'] != 100 && $response2['status'] != 201) {
-                $data['error'] = "Unable to obtain valid response from CheckOut URL. Please contact administrator for assistance";
-                $this->log("Error using Spotii Checkout API");
-            } else {
-                $response_body2 = $response2['ResponseBody'];
-                $this->log->write($response_body2);
-                $index = strpos($response_body2, '{');
-                $json_body = substr($response_body2, $index);
-                $response_body_arr2 = json_decode($json_body, true);
-                if (array_key_exists('checkout_url', $response_body_arr2)) {
-                    $checkout_url = $response_body_arr2['checkout_url'];
-                    $this->log($checkout_url);
-                    $data['action'] = $checkout_url;
-                    $params = explode("?", $checkout_url, 2);
-                    $split_params = explode("=", $params[1], 2);
-                    $form_param['token'] = $split_params[1];
-                    $data['form_params'] = $form_param;
-                    $data['button_confirm'] = 'Confirm Order';
-                    $data['currency'] = $order_info['currency_code'];
-                    $data['total'] = number_format($converted_total, 2, '.', '');
-                    $data['installment'] = number_format($converted_total / 4.00, 2, '.', '');
-                } else { // We did not receive a Checkout URL from Spotii, setup to redirect and log failure
-                    $data['error'] = "Unable to obtain valid response from CheckOut URL. Please contact administrator for assistance";
-                    $this->log("Error using Spotii Checkout API: " . $response_body2);
-                    $this->log($response_body2);
+            $response_body2 = $response2['ResponseBody'];
+            $this->log->write($response_body2);
+            $index = strpos($response_body2, '{');
+            $json_body = substr($response_body2, $index);
+            $response_body_arr2 = json_decode($json_body, true);
+            if (array_key_exists('checkout_url', $response_body_arr2)) {
+                $checkout_url = $response_body_arr2['checkout_url'];
+                $this->log($checkout_url);
+                $data['action'] = $checkout_url;
+                $params = explode("?", $checkout_url, 2);
+                $split_params = explode("=", $params[1], 2);
+                $form_param['token'] = $split_params[1];
+                $data['form_params'] = $form_param;
+                $data['button_confirm'] = 'Confirm Order';
+                $data['currency'] = $order_info['currency_code'];
+                $data['total'] = number_format($converted_total, 2, '.', '');
+                $data['installment'] = number_format($converted_total / 4.00, 2, '.', '');
+            } else { // We did not receive a Checkout URL from Spotii, setup to redirect and log failure
+                $this->log("Error using Spotii Checkout API: " . $response_body2);
+                $this->log($response_body2);
+                if(array_key_exists('message', $response_body_arr2)){
+                    $error =$response_body_arr2['code'].' - '.$response_body_arr2['message'];
+                } else {
+                    $error =$response_body2;
                 }
+                throw new Exception($error);
             }
-        
         }
         else
         {
@@ -257,10 +249,12 @@ class ControllerExtensionPaymentSpotii extends Controller
             $this->log("Error due to order value is less:[Spotii] " . $converted_total);
             $this->log($converted_total);
         }
+        
+        } catch (Exception $e) {
+			$data['error'] = 'Spotii error: '.$e->getMessage();
+		}
         return $this->load->view('extension/payment/spotii', $data);
     }
-
-
     public function callback()
     {
         $order_id = $this->session->data['order_id'];
@@ -271,7 +265,7 @@ class ControllerExtensionPaymentSpotii extends Controller
         $this->setToken();
         $body = array();
         $body = json_encode($body, JSON_UNESCAPED_UNICODE);
-        $url_part = $this->config->get('payment_spotii_test') == "sandbox"  ? 'https://api.dev.spotii.me/api/v1.0/orders/' : 'https://api.spotii.me/api/v1.0/orders/';
+        $url_part = $this->config->get('payment_spotii_test') == "sandbox"  ? 'https://api.sandbox.spotii.me/api/v1.0/orders/' : 'https://api.spotii.me/api/v1.0/orders/';
         $url = $url_part . $order_id . '/capture/';
         $response = $this->sendCurl($url, $body);
         $response_body = $response['ResponseBody'];
@@ -284,7 +278,7 @@ class ControllerExtensionPaymentSpotii extends Controller
         // Currency comparison needs to be removed, to support conversions
         $converted_total = number_format($order_info['total'] * $order_info['currency_value'], 2);
 
-        if ($response_body['status'] == "SUCCESS") { // && $response_body['currency'] == $order_info['currency_code'] && number_format($response_body['amount'], 2) == $converted_total){
+        if ($response_body['status'] == "SUCCESS"){# && $this->check_amount(number_format($response_body['amount'], 2), $response_body['currency'], $converted_total, $order_info['currency_code'])) { // && $response_body['currency'] == $order_info['currency_code'] && number_format($response_body['amount'], 2) == $converted_total){
             //Here we want to update the Order History to reflect the Order Status chosen in the setup portal
             //Then we can redicrect to the successful checkout screen
             $this->model_checkout_order->addOrderHistory($order_id, $this->config->get('payment_spotii_order_status_id'));
