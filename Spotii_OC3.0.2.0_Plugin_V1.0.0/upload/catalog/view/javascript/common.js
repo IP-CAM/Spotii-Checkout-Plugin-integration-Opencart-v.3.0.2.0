@@ -1,6 +1,7 @@
 ///////////////////////// V1.0.0 - Spotii Widget Code Snippet -- START-- SPOTII OC CHANGE TO BE DONE ////////////////////////////////
 $(document).ready(function () 
 {
+
   $(function () { /** This is the Start of Function for all widgets */
     var sptii_product_class = $(".spotii_widget_product");
     if (sptii_product_class && sptii_product_class.length) { /** This is the Start of product div check */
@@ -18,7 +19,7 @@ $(document).ready(function ()
         var f = d.getElementsByTagName(s)[0];
         var a = d.createElement("script");
         a.async = true;
-        a.src = "https://widget.spotii.me/v1/javascript/price-widget";
+        a.src = "https://widget.spotii.me/v1/javascript/priceWidget-en.js";
         f.parentNode.insertBefore(a, f);
       })(window, document, "script");
 
@@ -43,9 +44,12 @@ $(document).ready(function ()
     var sptii_cart_class = $(".spotii_widget_cart");
     if (sptii_cart_class && sptii_cart_class.length) { /** This is the Start of Function for Cart Widget */
       var cart_total =
-        $("#total tr:nth-child(2)")
+        $("#cart-total")
           .text()
-          .replace(/[^0-9]/g, "") / 100;
+		  .split('-')[1]
+		  .trim()
+          .replace(/[^0-9]/g, "")
+		  .replace('$','')/100;
       var instaPrice = parseFloat(cart_total / 4).toFixed(2);
       var currency = "د.إ";
       window.spotiiConfig = {
@@ -58,7 +62,7 @@ $(document).ready(function ()
         var f = d.getElementsByTagName(s)[0];
         var a = d.createElement("script");
         a.async = true;
-        a.src = "https://widget.spotii.me/v1/javascript/price-widget";
+        a.src = "https://widget.spotii.me/v1/javascript/priceWidget-en.js";
         f.parentNode.insertBefore(a, f);
       })(window, document, "script");
 
