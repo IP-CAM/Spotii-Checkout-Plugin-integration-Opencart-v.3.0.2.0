@@ -1,20 +1,20 @@
 <?php
-class ControllerExtensionPaymentSpotii extends Controller
+class ControllerExtensionPaymentSpotiipaynow extends Controller
 {
     private $error = array();
 
     /** SPOTII OC CHANGE TO BE DONE  - check merchant keys & corresponding fields */
 
     public function index(){
-        $this->language->load('extension/payment/spotii');
-        $this->document->setTitle('Spotii Payment Method Configuration');
+
+        $this->language->load('extension/payment/spotii_paynow');
+        $this->document->setTitle('Spotii Pay Now Payment Method Configuration');
         $this->load->model('setting/setting');
         // $this->model_payment_spotii->install();
 
         if ($this->request->server['REQUEST_METHOD'] == 'POST' && $this->validate()) {
-            $this->model_setting_setting->editSetting('payment_spotii', $this->request->post);
+            $this->model_setting_setting->editSetting('payment_spotii_paynow', $this->request->post);
             $this->session->data['success'] = $this->language->get('text_success');
- 
 
             $this->response->redirect($this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=payment', true));
         }
@@ -52,66 +52,68 @@ class ControllerExtensionPaymentSpotii extends Controller
 
         $data['breadcrumbs'][] = array(
             'text' => $this->language->get('heading_title'),
-            'href' => $this->url->link('extension/payment/spotii', 'user_token=' . $this->session->data['user_token'], true)
+            'href' => $this->url->link('extension/payment/spotii_paynow', 'user_token=' . $this->session->data['user_token'], true)
         );
 
-        $data['action'] = $this->url->link('extension/payment/spotii', 'user_token=' . $this->session->data['user_token'], true);
+        $data['action'] = $this->url->link('extension/payment/spotii_paynow', 'user_token=' . $this->session->data['user_token'], true);
         
         $data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=payment', true);
 
-        if (isset($this->request->post['payment_spotii_merchant_private_key'])) {
-            $data['payment_spotii_merchant_private_key'] = $this->request->post['payment_spotii_merchant_private_key'];
+        if (isset($this->request->post['payment_spotii_paynow_merchant_private_key'])) {
+            $data['payment_spotii_paynow_merchant_private_key'] = $this->request->post['payment_spotii_paynow_merchant_private_key'];
         } else {
-            $data['payment_spotii_merchant_private_key'] = $this->config->get('payment_spotii_merchant_private_key');
+            $data['payment_spotii_paynow_merchant_private_key'] = $this->config->get('payment_spotii_paynow_merchant_private_key');
         }
 
-        if (isset($this->request->post['payment_spotii_spotii_public_key'])) {
-            $data['payment_spotii_spotii_public_key'] = $this->request->post['payment_spotii_spotii_public_key'];
+        if (isset($this->request->post['payment_spotii_paynow_spotii_public_key'])) {
+            $data['payment_spotii_paynow_spotii_public_key'] = $this->request->post['payment_spotii_paynow_spotii_public_key'];
         } else {
-            $data['payment_spotii_spotii_public_key'] = $this->config->get('payment_spotii_spotii_public_key');
+            $data['payment_spotii_paynow_spotii_public_key'] = $this->config->get('payment_spotii_paynow_spotii_public_key');
         }
 
-        if (isset($this->request->post['payment_spotii_total'])) {
-            $data['payment_spotii_total'] = $this->request->post['payment_spotii_total'];
+        if (isset($this->request->post['payment_spotii_paynow_total'])) {
+            $data['payment_spotii_paynow_total'] = $this->request->post['payment_spotii_paynow_total'];
         } else {
-            $data['payment_spotii_total'] = $this->config->get('payment_spotii_total');
+            $data['payment_spotii_paynow_total'] = $this->config->get('payment_spotii_paynow_total');
         }
 
-        if (isset($this->request->post['payment_spotii_order_status_id'])) {
-            $data['payment_spotii_order_status_id'] = $this->request->post['payment_spotii_order_status_id'];
+        if (isset($this->request->post['payment_spotii_paynow_order_status_id'])) {
+            $data['payment_spotii_paynow_order_status_id'] = $this->request->post['payment_spotii_paynow_order_status_id'];
         } else {
-            $data['payment_spotii_order_status_id'] = $this->config->get('payment_spotii_order_status_id');
+            $data['payment_spotii_paynow_order_status_id'] = $this->config->get('payment_spotii_paynow_order_status_id');
         }
 
         $this->load->model('localisation/order_status');
 
         $data['order_statuses'] = $this->model_localisation_order_status->getOrderStatuses();
 
-        if (isset($this->request->post['payment_spotii_sort_order'])) {
-            $data['payment_spotii_sort_order'] = $this->request->post['payment_spotii_sort_order'];
+        if (isset($this->request->post['payment_spotii_paynow_sort_order'])) {
+            $data['payment_spotii_paynow_sort_order'] = $this->request->post['payment_spotii_paynow_sort_order'];
         } else {
-            $data['payment_spotii_sort_order'] = $this->config->get('payment_spotii_sort_order');
+            $data['payment_spotii_paynow_sort_order'] = $this->config->get('payment_spotii_paynow_sort_order');
         }
 
-        if (isset($this->request->post['payment_spotii_status'])) {
-            $data['payment_spotii_status'] = $this->request->post['payment_spotii_status'];
+        if (isset($this->request->post['payment_spotii_paynow_status'])) {
+            $data['payment_spotii_paynow_status'] = $this->request->post['payment_spotii_paynow_status'];
         } else {
-            $data['payment_spotii_status'] = $this->config->get('payment_spotii_status');
+            $data['payment_spotii_paynow_status'] = $this->config->get('payment_spotii_paynow_status');
         }
 
         $data['header'] = $this->load->controller('common/header');
         $data['column_left'] = $this->load->controller('common/column_left');
         $data['footer'] = $this->load->controller('common/footer');
-        $this->response->setOutput($this->load->view('extension/payment/spotii', $data));
+        $this->response->setOutput($this->load->view('extension/payment/spotii_paynow', $data));
     }
 
     public function refund()
     {
-        $this->load->language('extension/payment/spotii');
+        echo "SNPL - controller - validate";
+
+        $this->load->language('extension/payment/spotii_paynow');
         $json = array();
 
         if (isset($this->request->post['order_id']) && !empty($this->request->post['order_id'])) {
-            $this->load->model('extension/payment/spotii');
+            $this->load->model('extension/payment/spotii_paynow');
 
             $spotii_order = $this->model_extension_payment_spotii->getOrder($this->request->post['order_id']);
             $refund_response = $this->model_extension_payment_spotii->refund($this->request->post['order_id'], $this->request->post['amount']);
@@ -159,21 +161,20 @@ class ControllerExtensionPaymentSpotii extends Controller
 
     private function validate()
     {
-        if (!$this->user->hasPermission('modify', 'extension/payment/spotii')) {
+        if (!$this->user->hasPermission('modify', 'extension/payment/spotii_paynow')) {
             $this->error['warning'] = $this->language->get('error_permission');
         }
 
-        if (!$this->request->post['payment_spotii_merchant_private_key']) {
+        if (!$this->request->post['payment_spotii_paynow_merchant_private_key']) {
             $this->error['merchant_private_key'] = $this->language->get('error_merchant_private_key');
         }
 
-        if (!$this->request->post['payment_spotii_spotii_public_key']) {
+        if (!$this->request->post['payment_spotii_paynow_spotii_public_key']) {
             $this->error['spotii_public_key'] = $this->language->get('error_spotii_public_key');
         }
-
         if (empty($this->error)){
-            $this->load->model('extension/payment/spotii');
-            $keys = $this->model_extension_payment_spotii->validateKeys($this->request->post);
+            $this->load->model('extension/payment/spotii_paynow');
+            $keys = $this->model_extension_payment_spotii_paynow->validateKeys($this->request->post);
             if(!$keys){
                 $this->error['merchant_private_key'] = "One of your Keys is incorrect";
                 $this->error['spotii_public_key'] = "One of your Keys is incorrect";
