@@ -105,46 +105,46 @@ class ControllerExtensionPaymentSpotiipaynow extends Controller
         $this->response->setOutput($this->load->view('extension/payment/spotii_paynow', $data));
     }
 
-    public function refund()
-    {
-        echo "SNPL - controller - validate";
+    // public function refund()
+    // {
+    //     echo "SNPL - controller - validate";
 
-        $this->load->language('extension/payment/spotii_paynow');
-        $json = array();
+    //     $this->load->language('extension/payment/spotii_paynow');
+    //     $json = array();
 
-        if (isset($this->request->post['order_id']) && !empty($this->request->post['order_id'])) {
-            $this->load->model('extension/payment/spotii_paynow');
+    //     if (isset($this->request->post['order_id']) && !empty($this->request->post['order_id'])) {
+    //         $this->load->model('extension/payment/spotii_paynow');
 
-            $spotii_order = $this->model_extension_payment_spotii->getOrder($this->request->post['order_id']);
-            $refund_response = $this->model_extension_payment_spotii->refund($this->request->post['order_id'], $this->request->post['amount']);
+    //         $spotii_order = $this->model_extension_payment_spotii->getOrder($this->request->post['order_id']);
+    //         $refund_response = $this->model_extension_payment_spotii->refund($this->request->post['order_id'], $this->request->post['amount']);
 
-            if ($refund_response['status'] == 'success') {
-                $this->model_extension_payment_spotii->addTransaction($spotii_order['spotii_order_id'], 'refund', $this->request->post['amount'] * -1);
+    //         if ($refund_response['status'] == 'success') {
+    //             $this->model_extension_payment_spotii->addTransaction($spotii_order['spotii_order_id'], 'refund', $this->request->post['amount'] * -1);
 
-                $total_refunded = $this->model_extension_payment_spotti->getTotalRefunded($spotii_order['spotii_order_id']);
-                $total_released = $this->model_extension_payment_spotii->getTotalReleased($spotii_order['spotii_order_id']);
+    //             $total_refunded = $this->model_extension_payment_spotti->getTotalRefunded($spotii_order['spotii_order_id']);
+    //             $total_released = $this->model_extension_payment_spotii->getTotalReleased($spotii_order['spotii_order_id']);
 
-                $this->model_extension_payment_spotii->updateRefundStatus($spotii_order['spotii_order_id'], 1);
+    //             $this->model_extension_payment_spotii->updateRefundStatus($spotii_order['spotii_order_id'], 1);
 
-                $json['msg'] = $this->language->get('text_refund_ok_order');
-                $json['data'] = array();
-                $json['data']['created'] = date("Y-m-d H:i:s");
-                $json['data']['amount'] = $this->currency->format(($this->request->post['amount'] * -1), $spotii_order['currency_code'], false);
-                $json['data']['total_released'] = $this->currency->format($total_released, $spotii_order['currency_code'], false);
-                $json['data']['total_refund'] = $this->currency->format($total_refunded, $spotii_order['currency_code'], false);
-                $json['data']['refund_status'] = 1;
-                $json['error'] = false;
-            } else {
-                $json['error'] = true;
-                $json['msg'] = isset($refund_response['message']) && !empty($refund_response['message']) ? (string) $refund_response['message'] : 'Unable to refund';
-            }
-        } else {
-            $json['error'] = true;
-            $json['msg'] = 'Missing data';
-        }
+    //             $json['msg'] = $this->language->get('text_refund_ok_order');
+    //             $json['data'] = array();
+    //             $json['data']['created'] = date("Y-m-d H:i:s");
+    //             $json['data']['amount'] = $this->currency->format(($this->request->post['amount'] * -1), $spotii_order['currency_code'], false);
+    //             $json['data']['total_released'] = $this->currency->format($total_released, $spotii_order['currency_code'], false);
+    //             $json['data']['total_refund'] = $this->currency->format($total_refunded, $spotii_order['currency_code'], false);
+    //             $json['data']['refund_status'] = 1;
+    //             $json['error'] = false;
+    //         } else {
+    //             $json['error'] = true;
+    //             $json['msg'] = isset($refund_response['message']) && !empty($refund_response['message']) ? (string) $refund_response['message'] : 'Unable to refund';
+    //         }
+    //     } else {
+    //         $json['error'] = true;
+    //         $json['msg'] = 'Missing data';
+    //     }
 
-        $this->response->setOutput(json_encode($json));
-    }
+    //     $this->response->setOutput(json_encode($json));
+    // }
 
 
     // public function install()
