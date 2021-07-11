@@ -204,16 +204,16 @@ class ControllerExtensionPaymentSpotiipaynow extends Controller
 
         $body2 = json_encode($body2, JSON_UNESCAPED_UNICODE);
         $this->log->write($body2 . "request body");
-        $min =200;
+        $min =10;
         switch($order_info['currency_code']){
             case 'AED':
             case 'SAR':
                 break;
             case 'BHD':
             case 'OMR':
-            case 'KWD': $min=20;
+            case 'KWD': $min=1;
                 break;
-            case 'USD': $min=55;  
+            case 'USD': $min=2.72;  
                 break;
                     
         }
